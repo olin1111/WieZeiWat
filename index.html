@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Familie Raadspel - Wie Zei Wat?</title>
+    <title> Appeltjes schillen </title>
     <style>
         * {
             margin: 0;
@@ -312,7 +312,7 @@
 <body>
     <div class="game-container">
         <h1>Wie Zei Wat?</h1>
-        <p class="subtitle">Het spel voor diepere gesprekken</p>
+        <p class="subtitle">Het (familie) raadspel voor connectie </p>
         
         <div class="phase-indicator">
             <div class="phase-dot active" id="phase-1"></div>
@@ -398,14 +398,15 @@
             "Welke eigenschap van jezelf zou je graag willen veranderen?",
             "Wat is het moeilijkste gesprek dat je ooit hebt gehad?",
             "Waar ben je het meest trots op in je leven?",
-            "Wat is iets dat je zou willen zeggen tegen jezelf van 10 jaar geleden?",
+            "Wat zou je willen zeggen tegen jezelf van 10 jaar geleden?",
             "Hoe zie je onze relatie over 10 jaar?",
             "Wat denk je dat anderen het meest waarderen aan jou?",
             "Welke jeugdherinnering heeft je het meest gevormd?",
             "Wat zou je doen als geld geen rol speelde?",
             "Wat is het belangrijkste advies dat je ooit hebt gekregen?",
-            "Wat vind je het mooist aan jezelf",
-            "Wat is jouw love language"
+            "Wat het mooiste compliment dat je ooit hebt gekregen?",
+            "Wat is jouw love language?",
+            "Wat vind je het mooist aan jezelf?"
         ];
 
         const playerColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd', '#98d8c8', '#f06292'];
@@ -542,18 +543,16 @@
                 </div>
             `;
             
-            // Create player buttons (excluding the person who gave this answer)
+            // Create player buttons (including ALL players)
             const playerButtons = document.getElementById('player-guess-buttons');
             playerButtons.innerHTML = '';
             
             players.forEach(player => {
-                if (player !== currentAnswer.player) {
-                    const button = document.createElement('button');
-                    button.className = 'player-btn';
-                    button.textContent = player;
-                    button.onclick = () => selectPlayerGuess(player, button);
-                    playerButtons.appendChild(button);
-                }
+                const button = document.createElement('button');
+                button.className = 'player-btn';
+                button.textContent = player;
+                button.onclick = () => selectPlayerGuess(player, button);
+                playerButtons.appendChild(button);
             });
             
             currentGuess = null;
