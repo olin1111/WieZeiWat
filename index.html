@@ -1,1 +1,686 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Familie Raadspel - Wie Zei Wat?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+        }
+
+        .phase-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .phase-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ddd;
+            margin: 0 8px;
+            transition: all 0.3s ease;
+        }
+
+        .phase-dot.active {
+            background: #667eea;
+            transform: scale(1.3);
+        }
+
+        .setup-screen, .question-screen, .results-screen {
+            text-align: center;
+        }
+
+        .player-setup {
+            margin-bottom: 30px;
+        }
+
+        .player-inputs {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .player-input {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px 20px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .player-input:focus-within {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .player-input input {
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 16px;
+            width: 100%;
+            padding: 5px 0;
+            color: #2c3e50;
+        }
+
+        .player-input .player-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .question-card {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 6px solid #667eea;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .progress-bar {
+            background: #e1e8ed;
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .guessing-screen .answers-list {
+            margin-bottom: 30px;
+        }
+
+        .answer-option {
+            background: white;
+            border: 2px solid #e1e8ed;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .answer-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .answer-option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .player-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .player-btn {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 25px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .player-btn:hover, .player-btn.selected {
+            background: #667eea;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .score-display {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+        }
+
+        .score-item {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 16px;
+            min-width: 120px;
+        }
+
+        .score-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+        }
+
+        .score-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .reveal-answer {
+            background: #e8f5e8;
+            border: 2px solid #27ae60;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .correct-answer {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .player-buttons {
+                flex-direction: column;
+            }
+            
+            .score-display {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Wie Zei Wat?</h1>
+        <p class="subtitle">Het familie raadspel voor diepere gesprekken</p>
+        
+        <div class="phase-indicator">
+            <div class="phase-dot active" id="phase-1"></div>
+            <div class="phase-dot" id="phase-2"></div>
+            <div class="phase-dot" id="phase-3"></div>
+        </div>
+
+        <!-- Setup Screen -->
+        <div class="setup-screen" id="setup-screen">
+            <div class="player-setup">
+                <h2 style="margin-bottom: 20px; color: #2c3e50;">Wie doen er mee?</h2>
+                <div class="player-inputs" id="player-inputs">
+                    <div class="player-input">
+                        <div class="player-icon" style="background: #ff6b6b;"></div>
+                        <input type="text" placeholder="Naam van speler 1" id="player-1">
+                    </div>
+                    <div class="player-input">
+                        <div class="player-icon" style="background: #4ecdc4;"></div>
+                        <input type="text" placeholder="Naam van speler 2" id="player-2">
+                    </div>
+                </div>
+                <button class="btn" onclick="addPlayer()" id="add-player-btn">+ Speler toevoegen</button>
+                <button class="btn" onclick="startGame()" style="margin-left: 10px;" id="start-btn">Spel starten</button>
+            </div>
+        </div>
+
+        <!-- Question Screen -->
+        <div class="question-screen hidden" id="question-screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
+            </div>
+            
+            <div class="question-card">
+                <div class="question-text" id="current-question"></div>
+                <textarea class="answer-input" id="answer-input" placeholder="Jouw antwoord hier..."></textarea>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <strong>Beurt van: <span id="current-player" style="color: #667eea;"></span></strong>
+            </div>
+            
+            <button class="btn" onclick="submitAnswer()" id="submit-btn">Antwoord verzenden</button>
+        </div>
+
+        <!-- Guessing Screen -->
+        <div class="guessing-screen hidden" id="guessing-screen">
+            <div class="question-card">
+                <div class="question-text" id="guessing-question"></div>
+            </div>
+            
+            <div class="answers-list" id="answers-list"></div>
+            
+            <p style="margin-bottom: 20px;"><strong>Wie gaf dit antwoord?</strong></p>
+            <div class="player-buttons" id="player-guess-buttons"></div>
+            
+            <button class="btn" onclick="submitGuess()" id="guess-btn" disabled>Gok verzenden</button>
+        </div>
+
+        <!-- Results Screen -->
+        <div class="results-screen hidden" id="results-screen">
+            <h2 style="color: #2c3e50; margin-bottom: 30px;">🎉 Spelresultaten</h2>
+            
+            <div class="score-display" id="final-scores"></div>
+            
+            <button class="btn" onclick="restartGame()" style="margin-top: 30px;">Nieuw spel starten</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let players = [];
+        let currentQuestionIndex = 0;
+        let currentPlayerIndex = 0;
+        let currentAnswerIndex = 0;
+        let gamePhase = 'setup'; // setup, answering, guessing, results
+        let answers = [];
+        let scores = {};
+        let currentGuess = null;
+
+        // Questions pool
+        const questions = [
+            "Wat is je grootste angst voor de toekomst?",
+            "Welke eigenschap van jezelf zou je graag willen veranderen?",
+            "Wat is het moeilijkste gesprek dat je ooit hebt gehad?",
+            "Waar ben je het meest trots op in je leven?",
+            "Wat is je grootste spijt tot nu toe?",
+            "Hoe zie je onze relatie over 10 jaar?",
+            "Wat denk je dat anderen het meest waarderen aan jou?",
+            "Welke jeugdherinnering heeft je het meest gevormd?",
+            "Wat zou je doen als geld geen rol speelde?",
+            "Wat is het belangrijkste advies dat je ooit hebt gekregen?",
+            "Waar voel je je het meest onzeker over?",
+            "Wat zou je graag tegen je 16-jarige zelf willen zeggen?"
+        ];
+
+        const playerColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd', '#98d8c8', '#f06292'];
+
+        function addPlayer() {
+            if (players.length >= 6) {
+                alert('Maximum 6 spelers toegestaan');
+                return;
+            }
+
+            const playerCount = players.length + 1;
+            const color = playerColors[players.length] || '#95a5a6';
+            
+            const playerInput = document.createElement('div');
+            playerInput.className = 'player-input';
+            playerInput.innerHTML = `
+                <div class="player-icon" style="background: ${color};"></div>
+                <input type="text" placeholder="Naam van speler ${playerCount}" id="player-${playerCount}">
+            `;
+            
+            document.getElementById('player-inputs').appendChild(playerInput);
+            
+            if (players.length >= 5) {
+                document.getElementById('add-player-btn').style.display = 'none';
+            }
+        }
+
+        function startGame() {
+            // Collect player names
+            const playerInputs = document.querySelectorAll('#player-inputs input');
+            players = [];
+            
+            playerInputs.forEach(input => {
+                if (input.value.trim()) {
+                    players.push(input.value.trim());
+                }
+            });
+
+            if (players.length < 2) {
+                alert('Minimaal 2 spelers nodig om te spelen!');
+                return;
+            }
+
+            // Initialize scores
+            players.forEach(player => {
+                scores[player] = 0;
+            });
+
+            // Start the game
+            gamePhase = 'answering';
+            showQuestionScreen();
+            updatePhaseIndicator();
+        }
+
+        function showQuestionScreen() {
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('question-screen').classList.remove('hidden');
+            document.getElementById('guessing-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.add('hidden');
+            
+            displayCurrentQuestion();
+        }
+
+        function displayCurrentQuestion() {
+            const question = questions[currentQuestionIndex];
+            const player = players[currentPlayerIndex];
+            
+            document.getElementById('current-question').textContent = question;
+            document.getElementById('current-player').textContent = player;
+            document.getElementById('answer-input').value = '';
+            
+            // Update progress
+            const progress = ((currentPlayerIndex + currentQuestionIndex * players.length) / (questions.length * players.length)) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+        }
+
+        function submitAnswer() {
+            const answerText = document.getElementById('answer-input').value.trim();
+            
+            if (!answerText) {
+                alert('Vul een antwoord in!');
+                return;
+            }
+
+            // Store the answer
+            if (!answers[currentQuestionIndex]) {
+                answers[currentQuestionIndex] = [];
+            }
+            
+            answers[currentQuestionIndex].push({
+                player: players[currentPlayerIndex],
+                answer: answerText,
+                question: questions[currentQuestionIndex]
+            });
+
+            // Move to next player
+            currentPlayerIndex++;
+            
+            if (currentPlayerIndex >= players.length) {
+                // All players answered this question, start guessing phase
+                currentPlayerIndex = 0;
+                startGuessingPhase();
+            } else {
+                // Next player's turn
+                displayCurrentQuestion();
+            }
+        }
+
+        function startGuessingPhase() {
+            gamePhase = 'guessing';
+            currentAnswerIndex = 0;
+            showGuessingScreen();
+        }
+
+        function showGuessingScreen() {
+            document.getElementById('question-screen').classList.add('hidden');
+            document.getElementById('guessing-screen').classList.remove('hidden');
+            
+            displayCurrentGuess();
+        }
+
+        function displayCurrentGuess() {
+            const questionData = answers[currentQuestionIndex];
+            const currentAnswer = questionData[currentAnswerIndex];
+            
+            document.getElementById('guessing-question').textContent = currentAnswer.question;
+            
+            // Display the answer
+            const answersList = document.getElementById('answers-list');
+            answersList.innerHTML = `
+                <div class="answer-option">
+                    <strong>Antwoord:</strong><br>
+                    "${currentAnswer.answer}"
+                </div>
+            `;
+            
+            // Create player buttons (excluding the person who gave this answer)
+            const playerButtons = document.getElementById('player-guess-buttons');
+            playerButtons.innerHTML = '';
+            
+            players.forEach(player => {
+                if (player !== currentAnswer.player) {
+                    const button = document.createElement('button');
+                    button.className = 'player-btn';
+                    button.textContent = player;
+                    button.onclick = () => selectPlayerGuess(player, button);
+                    playerButtons.appendChild(button);
+                }
+            });
+            
+            currentGuess = null;
+            document.getElementById('guess-btn').disabled = true;
+        }
+
+        function selectPlayerGuess(player, button) {
+            // Remove selection from other buttons
+            document.querySelectorAll('.player-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Select this button
+            button.classList.add('selected');
+            currentGuess = player;
+            document.getElementById('guess-btn').disabled = false;
+        }
+
+        function submitGuess() {
+            const questionData = answers[currentQuestionIndex];
+            const currentAnswer = questionData[currentAnswerIndex];
+            const correctPlayer = currentAnswer.player;
+            
+            // Check if guess is correct
+            if (currentGuess === correctPlayer) {
+                scores[currentGuess]++;
+                alert(`🎉 Correct! Dit was inderdaad van ${correctPlayer}`);
+            } else {
+                alert(`❌ Helaas! Dit antwoord was van ${correctPlayer}, niet van ${currentGuess}`);
+            }
+
+            // Move to next answer
+            currentAnswerIndex++;
+            
+            if (currentAnswerIndex >= questionData.length) {
+                // Done with this question, move to next question or end game
+                currentQuestionIndex++;
+                currentAnswerIndex = 0;
+                
+                if (currentQuestionIndex >= Math.min(questions.length, 5)) {
+                    // Game finished
+                    showResults();
+                } else {
+                    // Next question
+                    gamePhase = 'answering';
+                    currentPlayerIndex = 0;
+                    showQuestionScreen();
+                }
+            } else {
+                // Next answer for same question
+                displayCurrentGuess();
+            }
+        }
+
+        function showResults() {
+            gamePhase = 'results';
+            document.getElementById('guessing-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.remove('hidden');
+            
+            // Update phase indicator
+            document.getElementById('phase-3').classList.add('active');
+            
+            // Display final scores
+            const scoresContainer = document.getElementById('final-scores');
+            scoresContainer.innerHTML = '';
+            
+            // Sort players by score
+            const sortedPlayers = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+            
+            sortedPlayers.forEach(([player, score]) => {
+                const scoreItem = document.createElement('div');
+                scoreItem.className = 'score-item';
+                scoreItem.innerHTML = `
+                    <span class="score-number">${score}</span>
+                    <div class="score-label">${player}</div>
+                `;
+                scoresContainer.appendChild(scoreItem);
+            });
+        }
+
+        function updatePhaseIndicator() {
+            document.querySelectorAll('.phase-dot').forEach(dot => {
+                dot.classList.remove('active');
+            });
+            
+            if (gamePhase === 'setup') {
+                document.getElementById('phase-1').classList.add('active');
+            } else if (gamePhase === 'answering' || gamePhase === 'guessing') {
+                document.getElementById('phase-2').classList.add('active');
+            } else if (gamePhase === 'results') {
+                document.getElementById('phase-3').classList.add('active');
+            }
+        }
+
+        function restartGame() {
+            // Reset game state
+            players = [];
+            currentQuestionIndex = 0;
+            currentPlayerIndex = 0;
+            currentAnswerIndex = 0;
+            gamePhase = 'setup';
+            answers = [];
+            scores = {};
+            currentGuess = null;
+            
+            // Reset UI
+            document.getElementById('results-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
+            
+            // Clear player inputs
+            document.getElementById('player-inputs').innerHTML = `
+                <div class="player-input">
+                    <div class="player-icon" style="background: #ff6b6b;"></div>
+                    <input type="text" placeholder="Naam van speler 1" id="player-1">
+                </div>
+                <div class="player-input">
+                    <div class="player-icon" style="background: #4ecdc4;"></div>
+                    <input type="text" placeholder="Naam van speler 2" id="player-2">
+                </div>
+            `;
+            
+            document.getElementById('add-player-btn').style.display = 'inline-block';
+            updatePhaseIndicator();
+        }
+
+        // Initialize phase indicator
+        updatePhaseIndicator();
+    </script>
+</body>
+</html>
